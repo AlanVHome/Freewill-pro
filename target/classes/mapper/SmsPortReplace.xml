@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="alan.tool.bean.dao.SmsPortReplaceDao">
+	<resultMap id="BaseResultMap" type="alan.tool.bean.SmsPortReplace">
+		<result column="id" property="id" jdbcType="INTEGER" />
+		<result column="channel_sign" property="chanId" jdbcType="VARCHAR" />
+		<result column="port_num" property="portNum" jdbcType="VARCHAR" />
+		<result column="replaced_num" property="replacedNum" jdbcType="VARCHAR" />
+		<result column="status" property="status" jdbcType="VARCHAR" />
+		<result column="remarks" property="remarks" jdbcType="VARCHAR" />
+		<result column="repl_province" property="replProvince" jdbcType="VARCHAR" />
+		<result column="repl_type" property="replType" jdbcType="VARCHAR" />
+	</resultMap>
+	<!-- S状态特别指定 全局替换端口 使用卓望 -->
+	<select id="queryAllSmsPortReplace" resultMap="BaseResultMap">
+		select id ,channel_sign,port_num,replaced_num ,status,remarks, repl_province ,repl_type from sms_port_replace where status in ('U','S') ;
+	</select>
+	<insert id="insertSmsPortReplace" parameterType="alan.tool.bean.SmsPortReplace">
+	    INSERT INTO sms_port_replace (id, channel_sign, port_num, replaced_num, STATUS, REMARKS, REPL_PROVINCE, REPL_TYPE) VALUES
+	     (null, #{chanID}, #{port}, #{repPort}, 'E', #{remark}, '', '0');
+	           
+	</insert>
+
+
+</mapper>

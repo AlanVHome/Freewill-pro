@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	 xmlns:tx="http://www.springframework.org/schema/tx"
+	 xmlns:aop="http://www.springframework.org/schema/aop"
+	  xmlns:cache="http://www.springframework.org/schema/cache"  
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.1.xsd
+    http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.1.xsd
+    http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
+    http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache-4.1.xsd
+    http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.1.xsd">
+    
+	<context:annotation-config />
+	<context:component-scan base-package="alan" />
+	<aop:aspectj-autoproxy proxy-target-class="true" />
+	
+	<context:property-placeholder location="classpath:global.properties" ignore-unresolvable="true"/> 
+
+	<bean class="alan.tool.conmmon.PropertyConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:jdbc.properties</value>
+			</list>
+		</property>
+	</bean>
+	  
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">  
+		<property name="name" value="smscore"/>
+	    <property name="driverClassName" value="${jdbc.driver}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+		<property name="filters" value="stat" />  
+		<property name="maxActive" value="20" />   
+		<property name="initialSize" value="1" />  
+		<property name="maxWait" value="60000" />  
+		<property name="minIdle" value="1" />  
+		<property name="timeBetweenEvictionRunsMillis" value="3000" />  
+		<property name="minEvictableIdleTimeMillis" value="300000" />  
+		<property name="validationQuery" value="SELECT 'x'" />  
+		<property name="testWhileIdle" value="true" />  
+		<property name="testOnBorrow" value="false" />  
+		<property name="testOnReturn" value="false" />  
+		<property name="poolPreparedStatements" value="true" />  
+		<property name="maxPoolPreparedStatementPerConnectionSize" value="20" />  
+	</bean>
+
+	<!-- SqlSession的工厂类 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="configLocation" value="classpath:Mapping.xml"></property>
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<!-- SqlSession -->
+	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg index="0" ref="sqlSessionFactory" />
+	</bean>
+	
+	
+	<!-- 用于日志入表 -->
+	<bean id="logDataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">  
+		<property name="name" value="smslog"/>
+	    <property name="driverClassName" value="${log.jdbc.driver}" />
+		<property name="url" value="${log.jdbc.url}" />
+		<property name="username" value="${log.jdbc.username}" />
+		<property name="password" value="${log.jdbc.password}" />
+		<property name="filters" value="stat" />  
+		<property name="maxActive" value="20" />   
+		<property name="initialSize" value="1" />  
+		<property name="maxWait" value="60000" />  
+		<property name="minIdle" value="1" />  
+		<property name="timeBetweenEvictionRunsMillis" value="3000" />  
+		<property name="minEvictableIdleTimeMillis" value="300000" />  
+		<property name="validationQuery" value="SELECT 'x'" />  
+		<property name="testWhileIdle" value="true" />  
+		<property name="testOnBorrow" value="false" />  
+		<property name="testOnReturn" value="false" />  
+		<property name="poolPreparedStatements" value="true" />  
+		<property name="maxPoolPreparedStatementPerConnectionSize" value="20" />  
+	</bean>
+	
+	<!-- 用于日志入表SqlSession的工厂类 -->
+	<bean id="logSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="configLocation" value="classpath:Mapping.xml"></property>
+		<property name="dataSource" ref="logDataSource"></property>
+	</bean>
+	
+	<!-- 用于日志入表SqlSession -->
+	<bean id="logSqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg index="0" ref="logSqlSessionFactory" />
+	</bean>
+
+
+	<!-- transactionManager不是必需 -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+	<!-- 基于注释的事务，当注释中发现@Transactional时，使用id为“transactionManager”的事务管理器 -->
+	<!-- 如果没有设置transaction-manager的值，则spring以缺省默认的事务管理器来处理事务，默认事务管理器为第一个加载的事务管理器 -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+
+  	<!--用于非spring管理的对象获取bean-->
+	<bean id="springContextUtil" class="alan.tool.conmmon.SpringContextUtil" />
+	
+<!--  	<bean id="" class="com.zx.ServerShutDownListener" > -->
+<!-- 	</bean> -->
+<!-- 	<bean id="" class="com.zx.ServerStartListener" > -->
+<!-- 		 <property name="configFile" value="configuration.xml"/> -->
+<!-- 		 <property name="loadFromDB" value="${loadFromDB}"/> -->
+<!-- 		 <property name="serverType" value="${serverType}"/> -->
+<!-- 	</bean> -->
+	<cache:annotation-driven cache-manager="ehcacheManager"/>  
+	
+	 <bean id="ehcacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
+        <property name="cacheManager" ref="cacheManager" />
+    </bean>
+	
+    <bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">  
+        <property name="configLocation">    
+            <value>classpath:springEhcache.xml</value>    
+        </property>   
+    </bean> 
+<!-- 	<import resource="cmppMsgHandler.xml" /> -->
+	
+</beans>  
+

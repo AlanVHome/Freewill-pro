@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="alan.tool.bean.UserInfo" >
+  <resultMap id="BaseResultMap" type="alan.tool.bean.UserInfo" >
+    <id column="ID" property="id" jdbcType="BIGINT" />
+    <result column="TERMID" property="termid" jdbcType="VARCHAR" />
+    <result column="BILLID" property="billid" jdbcType="VARCHAR" />
+    <result column="IMPWD" property="impwd" jdbcType="VARCHAR" />
+    <result column="EXT1" property="ext1" jdbcType="VARCHAR" />
+    <result column="EXT2" property="ext2" jdbcType="VARCHAR" />
+    <result column="EXT3" property="ext3" jdbcType="VARCHAR" />
+  </resultMap>
+  
+  <insert id="saveIMUserInfo" >
+  	INSERT INTO im_user_info (TERMID, BILLID, IMPWD) 
+  	VALUES (#{termid,jdbcType=VARCHAR}, #{billid,jdbcType=VARCHAR}, #{impwd,jdbcType=VARCHAR})
+  </insert>
+  <select id="findUserInfoByTermid" resultMap="BaseResultMap" >
+  	SELECT * FROM im_user_info WHERE TERMID = #{termid,jdbcType=VARCHAR}
+  </select>
+  <select id="findUserInfoByBillid" resultMap="BaseResultMap" >
+  	SELECT * FROM im_user_info WHERE BILLID = #{billid,jdbcType=VARCHAR}
+  </select>
+  
+</mapper>
